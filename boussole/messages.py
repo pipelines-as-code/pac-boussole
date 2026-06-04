@@ -26,7 +26,7 @@ Congrats @{pr_sender} your PR Has been approved 🎉
 
 ### ✅ Pull Request Approved
 
-*Approval Status:* 
+*Approval Status:*
 * Required Approvals: {threshold}
 * Current Approvals: {valid_votes}
 
@@ -119,7 +119,7 @@ Unable to process LGTM votes due to API error:
 * Status Code: `{status_code}`
 * Response: `{response_text}`
 
-*Troubleshooting Steps:* 
+*Troubleshooting Steps:*
 1. Check your authentication token
 2. Verify PR number: `{pr_num}`
 3. Ensure the PR hasn't been closed or deleted
@@ -233,7 +233,7 @@ Successfully cherry-picked changes from PR #{source_pr} to branch `{target_branc
 """
 
 CHERRY_PICK_CONFLICT = """
-🚨 Merge conflict detected while cherry-picking PR #{self.pr_num} to {target_branch}
+🚨 Merge conflict detected while cherry-picking PR #{pr_num} to {target_branch}
 • Progress: {current_commit}/{total_commits} commits
 • Conflicting commit: {commit_sha}
 
@@ -241,7 +241,7 @@ To resolve this conflict:
 1. Create a new branch from {target_branch}
 
 ```shell
-git checkout -b resolve-cherry-pick-{self.pr_num} origin/{target_branch}
+git checkout -b resolve-cherry-pick-{pr_num} origin/{target_branch}
 ```
 
 2. Cherry-pick the commits manually using:
@@ -254,8 +254,8 @@ git cherry-pick {commit_sha}
 4. Create a new PR with your changes
 
 ```shell
-git push YOURFORKREMOTE resolve-cherry-pick-{self.pr_num} --force-with-lease
-gh pr create --base {target_branch} --head YOURFORK:resolve-cherry-pick-{self.pr_num}
+git push YOURFORKREMOTE resolve-cherry-pick-{pr_num} --force-with-lease
+gh pr create --base {target_branch} --head YOURFORK:resolve-cherry-pick-{pr_num}
 
 ```
 

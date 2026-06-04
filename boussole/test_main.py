@@ -118,3 +118,115 @@ def test_main_invalid_command(monkeypatch):
     with pytest.raises(SystemExit):
         main()
     assert exit_code == 1
+
+
+def test_main_cherry_pick_on_merged_pr(monkeypatch):
+    cherry_pick_called = {}
+
+    def fake_check_status(self, num, status):
+        return status != "open"
+
+    def fake_get_pr_status(self, num):
+        class FakeResp:
+            status_code = 200
+
+            def json(self):
+                return {"state": "closed", "merged": True}
+
+        return FakeResp()
+
+    def fake_cherry_pick(self, values, immediate=False):
+        cherry_pick_called["values"] = values
+        cherry_pick_called["immediate"] = immediate
+
+    monkeypatch.setattr(PRHandler, "check_status", fake_check_status)
+    monkeypatch.setattr(PRHandler, "_get_pr_status", fake_get_pr_status)
+    monkeypatch.setattr(PRHandler, "cherry_pick", fake_cherry_pick)
+
+    sys.argv = [
+        "prog",
+        "--github-token",
+        "token",
+        "--pr-num",
+        "1",
+        "--pr-sender",
+        "user",
+        "--comment-sender",
+        "admin",
+        "--repo-owner",
+        "owner",
+        "--repo-name",
+        "repo",
+        "--trigger-comment",
+        "/cherry-pick release-1.0",
+        "--lgtm-threshold",
+        "1",
+        "--lgtm-permissions",
+        "admin,write",
+        "--lgtm-review-event",
+        "APPROVE",
+        "--merge-method",
+        "squash",
+    ]
+
+    main()
+    assert cherry_pick_called["values"] == ["release-1.0"]
+    assert cherry_pick_called["immediate"] is True
+
+
+def test_main_cherry_pick_on_closed_not_merged_pr(monkeypatch):
+    posted_comment = {}
+
+    def fake_check_status(self, num, status):
+        return status != "open"
+
+    def fake_get_pr_status(self, num):
+        class FakeResp:
+            status_code = 200
+
+            def json(self):
+                return {"state": "closed", "merged": False}
+
+        return FakeResp()
+
+    def fake_check_membership(self, user):
+        return "admin", True
+
+    def fake_post_comment(self, msg):
+        posted_comment["msg"] = msg
+
+    monkeypatch.setattr(PRHandler, "check_status", fake_check_status)
+    monkeypatch.setattr(PRHandler, "_get_pr_status", fake_get_pr_status)
+    monkeypatch.setattr(PRHandler, "_check_membership", fake_check_membership)
+    monkeypatch.setattr(PRHandler, "_post_comment", fake_post_comment)
+
+    sys.argv = [
+        "prog",
+        "--github-token",
+        "token",
+        "--pr-num",
+        "1",
+        "--pr-sender",
+        "user",
+        "--comment-sender",
+        "admin",
+        "--repo-owner",
+        "owner",
+        "--repo-name",
+        "repo",
+        "--trigger-comment",
+        "/cherry-pick release-1.0",
+        "--lgtm-threshold",
+        "1",
+        "--lgtm-permissions",
+        "admin,write",
+        "--lgtm-review-event",
+        "APPROVE",
+        "--merge-method",
+        "squash",
+    ]
+
+    with pytest.raises(SystemExit) as exc_info:
+        main()
+    assert exc_info.value.code == 1
+    assert "closed but not merged" in posted_comment["msg"]

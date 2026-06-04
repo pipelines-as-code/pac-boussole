@@ -375,3 +375,70 @@ def test_assign_unassign_pr_author(pr_handler):
     with pytest.raises(SystemExit) as exc_info:
         pr_handler.assign_unassign("assign", ["test_user"])
         assert exc_info == 1
+
+
+def test_cherry_pick_open_pr(pr_handler, mock_api):
+    mock_api.get.return_value = MyFakeResponse(200, {"permission": "admin"})
+    mock_api.post.return_value.status_code = 200
+    pr_handler.cherry_pick(["release-1.0"])
+    mock_api.post.assert_called_with(
+        "issues/123/comments",
+        {"body": "✅ We will cherry-pick this PR to the branch `release-1.0` upon merge."},
+    )
+
+
+def test_cherry_pick_open_pr_insufficient_permissions(pr_handler, mock_api):
+    mock_api.get.return_value = MyFakeResponse(200, {"permission": "read"})
+    mock_api.post.return_value = MyFakeResponse(200, {})
+
+    with pytest.raises(SystemExit) as exc_info:
+        pr_handler.cherry_pick(["release-1.0"])
+    assert exc_info.value.code == 1
+
+
+def test_cherry_pick_invalid_args(pr_handler):
+    with pytest.raises(SystemExit) as exc_info:
+        pr_handler.cherry_pick(["branch1", "branch2"])
+    assert exc_info.value.code == 1
+
+
+def test_cherry_pick_immediate_success(pr_handler, mock_api):
+    commits = [
+        {"sha": "abc123", "commit": {"message": "fix: something"}},
+    ]
+    mock_responses = [
+        MyFakeResponse(200, {"permission": "admin"}),
+        MyFakeResponse(200, {"state": "closed", "merged": True, "base": {"ref": "main"}}),
+        MyFakeResponse(200, commits),
+        MyFakeResponse(200, {"object": {"sha": "target_sha"}}),
+    ]
+    mock_api.get.side_effect = mock_responses
+    mock_api.post.return_value = MyFakeResponse(201, {"sha": "new_sha"})
+
+    pr_handler.cherry_pick(["release-1.0"], immediate=True)
+
+    post_calls = mock_api.post.call_args_list
+    assert any(
+        "Cherry Pick Successful" in str(call) for call in post_calls
+    )
+
+
+def test_cherry_pick_immediate_closed_not_merged(pr_handler, mock_api):
+    mock_responses = [
+        MyFakeResponse(200, {"permission": "admin"}),
+        MyFakeResponse(200, {"state": "closed", "merged": False}),
+    ]
+    mock_api.get.side_effect = mock_responses
+
+    with pytest.raises(SystemExit) as exc_info:
+        pr_handler.cherry_pick(["release-1.0"], immediate=True)
+    assert exc_info.value.code == 1
+
+
+def test_cherry_pick_immediate_insufficient_permissions(pr_handler, mock_api):
+    mock_api.get.return_value = MyFakeResponse(200, {"permission": "read"})
+    mock_api.post.return_value = MyFakeResponse(200, {})
+
+    with pytest.raises(SystemExit) as exc_info:
+        pr_handler.cherry_pick(["release-1.0"], immediate=True)
+    assert exc_info.value.code == 1

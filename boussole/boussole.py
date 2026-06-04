@@ -335,9 +335,12 @@ class PRHandler:  # pylint: disable=too-many-instance-attributes
             self.api.delete(f"issues/{self.pr_num}/labels/{label}")
         return self._post_comment(f"✅ Removed labels: <b>{', '.join(labels)}</b>.")
 
-    def cherry_pick(self, values: List[str]) -> None:
+    def cherry_pick(self, values: List[str], immediate: bool = False) -> None:
         """
-        Posts a comment indicating the PR will be cherry-picked to the specified branch.
+        Handles cherry-pick command.
+
+        When immediate=False (PR is open): checks permissions, posts an info comment.
+        When immediate=True (PR is merged): checks merged state, permissions, then performs cherry-pick.
         """
         if len(values) != 1:
             print(
@@ -347,9 +350,32 @@ class PRHandler:  # pylint: disable=too-many-instance-attributes
             sys.exit(1)
 
         target_branch = values[0]
-        self._post_comment(
-            f"✅ We will cherry-pick this PR to the branch `{target_branch}` upon merge."
-        )
+
+        permission, is_valid = self._check_membership(self.comment_sender)
+        if not is_valid:
+            msg = INSUFFICIENT_PERMISSIONS.format(
+                user=self.comment_sender,
+                permission=permission,
+                required_permissions=", ".join(self.lgtm_permissions),
+            )
+            self._post_comment(msg)
+            print(msg, file=sys.stderr)
+            sys.exit(1)
+
+        if not immediate:
+            self._post_comment(
+                f"✅ We will cherry-pick this PR to the branch `{target_branch}` upon merge."
+            )
+            return
+
+        pr_status = self._get_pr_status(self.pr_num).json()
+        if not pr_status.get("merged"):
+            msg = f"⚠️ PR #{self.pr_num} is closed but not merged. Cannot cherry-pick."
+            self._post_comment(msg)
+            print(msg, file=sys.stderr)
+            sys.exit(1)
+
+        self._perform_cherry_pick(target_branch)
 
     def rebase(self) -> RequestResponse:
         endpoint = f"pulls/{self.pr_num}/update-branch"
@@ -438,7 +464,7 @@ class PRHandler:  # pylint: disable=too-many-instance-attributes
         # Fetch LGTM votes
         valid_votes, lgtm_users = self._fetch_and_validate_lgtm_votes()
         # Handle case where admin/write user can merge directly
-        if self.pr_sender not in self.comment_sender and permission in [
+        if self.pr_sender != self.comment_sender and permission in [
             "admin",
             "write",
         ]:
@@ -796,7 +822,9 @@ def main():
     command, values = match.groups()
     values = values.split()
 
-    if not pr_handler.check_status(args.pr_num, "open"):
+    pr_is_open = pr_handler.check_status(args.pr_num, "open")
+
+    if not pr_is_open and command != "cherry-pick":
         print(f"⚠️ PR #{args.pr_num} is not open.", file=sys.stderr)
         sys.exit(1)
 
@@ -814,7 +842,6 @@ def main():
     elif command == "lgtm":
         pr_handler.lgtm()
     elif command == "merge":
-        # Pass custom merge method if provided
         merge_method = (
             values[0]
             if values and values[0].lower() in ["merge", "squash", "rebase"]
@@ -822,7 +849,7 @@ def main():
         )
         pr_handler.merge_pr(merge_method)
     elif command == "cherry-pick":
-        pr_handler.cherry_pick(values)
+        pr_handler.cherry_pick(values, immediate=not pr_is_open)
 
     if response:
         if not pr_handler.check_response(response):

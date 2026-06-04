@@ -32,7 +32,7 @@ spec:
       taskSpec:
         steps:
           - name: manage-pr
-            image: ghcr.io/openshift-pipelines/pac-boussole:nightly
+            image: ghcr.io/pipelines-as-code/pac-boussole:nightly
             env:
               - name: GITHUB_TOKEN
                 valueFrom:

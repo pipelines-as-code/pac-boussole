@@ -17,7 +17,7 @@ HELP_TEXT = f"""
 | `/help`                     | Shows this help message                                                         |
 
 
-*Automated by the [PAC Boussole](https://github.com/openshift-pipelines/pac-boussole) 🧭* 
+*Automated by the [PAC Boussole](https://github.com/pipelines-as-code/pac-boussole) 🧭*
 
 """
 
@@ -42,7 +42,7 @@ Congrats @{pr_sender} your PR Has been approved 🎉
 directly if you have repository permission).
 
 
-*Automated by the [PAC Boussole](https://github.com/openshift-pipelines/pac-boussole) 🧭* 
+*Automated by the [PAC Boussole](https://github.com/pipelines-as-code/pac-boussole) 🧭*
 
 """
 
@@ -52,13 +52,13 @@ LGTM_BREAKDOWN_TEMPLATE = """
 * **Current valid votes:** {valid_votes}/{threshold}
 * **Voting required for approval:** {threshold}
 
-*Votes Summary:* 
+*Votes Summary:*
 | Reviewer | Permission | Valid Vote |
 |----------|------------|------------|
 {users_table}
 
 
-*Automated by the [PAC Boussole](https://github.com/openshift-pipelines/pac-boussole) 🧭* 
+*Automated by the [PAC Boussole](https://github.com/pipelines-as-code/pac-boussole) 🧭*
 
 """
 
@@ -77,7 +77,7 @@ SUCCESS_MERGED = """
 
 Thank you @{pr_sender} for your valuable contribution! 🎉
 
-*Automated by the [PAC Boussole](https://github.com/openshift-pipelines/pac-boussole) 🧭* 
+*Automated by the [PAC Boussole](https://github.com/pipelines-as-code/pac-boussole) 🧭*
 
 """
 
@@ -95,7 +95,7 @@ Unable to verify permissions for user **@{user}**
 Please check user permissions and try again.
 
 
-*Automated by the [PAC Boussole](https://github.com/openshift-pipelines/pac-boussole) 🧭* 
+*Automated by the [PAC Boussole](https://github.com/pipelines-as-code/pac-boussole) 🧭*
 
 """
 
@@ -108,7 +108,7 @@ Failed to retrieve permission level for user **@{user}**
 * Please contact repository administrators for assistance
 
 
-*Automated by the [PAC Boussole](https://github.com/openshift-pipelines/pac-boussole) 🧭* 
+*Automated by the [PAC Boussole](https://github.com/pipelines-as-code/pac-boussole) 🧭*
 
 """
 
@@ -125,7 +125,7 @@ Unable to process LGTM votes due to API error:
 3. Ensure the PR hasn't been closed or deleted
 
 
-*Automated by the [PAC Boussole](https://github.com/openshift-pipelines/pac-boussole) 🧭* 
+*Automated by the [PAC Boussole](https://github.com/pipelines-as-code/pac-boussole) 🧭*
 
 """
 
@@ -139,7 +139,7 @@ SELF_APPROVAL_ERROR = """
 Please wait for reviews from other team members.
 
 
-*Automated by the [PAC Boussole](https://github.com/openshift-pipelines/pac-boussole) 🧭* 
+*Automated by the [PAC Boussole](https://github.com/pipelines-as-code/pac-boussole) 🧭*
 
 """
 
@@ -151,7 +151,7 @@ The user @{pr_sender} is the author of this Pull Request.
 Nice try though! Authors reviewing their own code is like grading your own exam
 - tempting but defeats the purpose! 😉
 
-*Automated by the [PAC Boussole](https://github.com/openshift-pipelines/pac-boussole) 🧭* 
+*Automated by the [PAC Boussole](https://github.com/pipelines-as-code/pac-boussole) 🧭*
 """
 
 INSUFFICIENT_PERMISSIONS = """
@@ -163,19 +163,19 @@ INSUFFICIENT_PERMISSIONS = """
 
 Please request assistance from a repository maintainer.
 
-*Automated by the [PAC Boussole](https://github.com/openshift-pipelines/pac-boussole) 🧭* 
+*Automated by the [PAC Boussole](https://github.com/pipelines-as-code/pac-boussole) 🧭*
 """
 
 NOT_ENOUGH_LGTM = """
 ### ❌ Insufficient Approvals
 
-* Current valid LGTM votes: **{valid_votes}** 
+* Current valid LGTM votes: **{valid_votes}**
 * Required votes: **{threshold}**
 
 Please obtain additional approvals before merging.
 
 
-*Automated by the [PAC Boussole](https://github.com/openshift-pipelines/pac-boussole) 🧭* 
+*Automated by the [PAC Boussole](https://github.com/pipelines-as-code/pac-boussole) 🧭*
 
 """
 
@@ -186,14 +186,14 @@ Unable to merge PR #{pr_num}:
 * Status Code: `{status_code}`
 * Error: `{error_text}`
 
-*Possible causes:* 
+*Possible causes:*
 * Branch protection rules not satisfied
 * Merge conflicts present
 * Required checks failing
 
 Please resolve any issues and try again.
 
-*Automated by the [PAC Boussole](https://github.com/openshift-pipelines/pac-boussole) 🧭* 
+*Automated by the [PAC Boussole](https://github.com/pipelines-as-code/pac-boussole) 🧭*
 """
 
 # Add new error message template for cherry-pick
@@ -204,7 +204,7 @@ Failed to cherry-pick changes from PR #{source_pr} to branch `{target_branch}`:
 * Status Code: `{status_code}`
 * Error: `{error_text}`
 
-*Possible causes:* 
+*Possible causes:*
 * Merge conflicts
 * Branch protection rules
 * Invalid branch name
@@ -212,7 +212,7 @@ Failed to cherry-pick changes from PR #{source_pr} to branch `{target_branch}`:
 
 Please resolve any issues and try again.
 
-*Automated by the [PAC Boussole](https://github.com/openshift-pipelines/pac-boussole) 🧭* 
+*Automated by the [PAC Boussole](https://github.com/pipelines-as-code/pac-boussole) 🧭*
 
 """
 
@@ -221,14 +221,14 @@ CHERRY_PICK_SUCCESS = """
 
 Successfully cherry-picked changes from PR #{source_pr} to branch `{target_branch}`.
 
-*Details:* 
+*Details:*
 * Source PR: #{source_pr}
 * Target Branch: `{target_branch}`
 * Cherry-picked by: @{user}
 * New commit SHA: `{commit_sha}`
 
 
-*Automated by the [PAC Boussole](https://github.com/openshift-pipelines/pac-boussole) 🧭* 
+*Automated by the [PAC Boussole](https://github.com/pipelines-as-code/pac-boussole) 🧭*
 
 """
 
@@ -262,13 +262,13 @@ gh pr create --base {target_branch} --head YOURFORK:resolve-cherry-pick-{self.pr
 Need assistance? Please contact the repository maintainers.
 
 
-*Automated by the [PAC Boussole](https://github.com/openshift-pipelines/pac-boussole) 🧭* 
+*Automated by the [PAC Boussole](https://github.com/pipelines-as-code/pac-boussole) 🧭*
 
 """
 
 REVIEW_REQUESTED = """{greeting}
 
-🔍 @{submitter} has kindly requested your review on this PR. 
+🔍 @{submitter} has kindly requested your review on this PR.
 
 • Please review the changes and provide your feedback
 • Look for code quality, potential bugs, and overall design
@@ -281,7 +281,7 @@ appreciated.
 Thank you for your help! 🙌
 
 
-*Automated by the [PAC Boussole](https://github.com/openshift-pipelines/pac-boussole) 🧭* 
+*Automated by the [PAC Boussole](https://github.com/pipelines-as-code/pac-boussole) 🧭*
 
 """
 
@@ -293,5 +293,5 @@ CHECKS_NOT_PASSED = """⚠️ Cannot merge PR: Some required checks haven't comp
 🔍 Please ensure all checks pass before merging.
 💡 Tip: Review the failing checks above and address any issues.
 
-*Automated by the [PAC Boussole](https://github.com/openshift-pipelines/pac-boussole) 🧭* 
+*Automated by the [PAC Boussole](https://github.com/pipelines-as-code/pac-boussole) 🧭*
 """

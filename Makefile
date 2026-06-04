@@ -3,14 +3,14 @@ CMD =
 ARGS=
 UVCMD = uv run
 PIPELINE_PROW = pipeline-boussole.yaml
-GH_REPO_OWNER = openshift-pipelines
+GH_REPO_OWNER = pipelines-as-code
 GH_REPO_NAME = pac-boussole
 GH_PR_NUM = 44
 GH_PR_SENDER = anotheruser
 GH_COMMENT_SENDER = chmouel
 PASS_TOKEN = github/chmouel-token
 PRURL = https://github.com/$(GH_REPO_OWNER)/$(GH_REPO_NAME)/pull/$(GH_PR_NUM)
-CONTAINER_IMAGE = ghcr.io/openshift-pipelines/pac-boussole:nightly
+CONTAINER_IMAGE = ghcr.io/pipelines-as-code/pac-boussole:nightly
 PYTEST = pytest
 PYLINT = pylint
 PYTEST_ARGS = --cov=boussole --cov-report=term

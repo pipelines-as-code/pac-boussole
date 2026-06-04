@@ -11,6 +11,9 @@ on:
     paths:
       - "boussole/**"
 
+permissions:
+  packages: write
+
 jobs:
   build-multi-arch-image:
     runs-on: ubuntu-latest

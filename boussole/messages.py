@@ -21,6 +21,116 @@ HELP_TEXT = f"""
 
 """
 
+HELP_TOPIC_TEMPLATES = {
+    "assign": """
+### `/assign` Help
+
+**Syntax:** `/assign user1 [user2 ...]`
+
+**Example:** `/assign octocat monalisa`
+
+**Permissions:** The configured GitHub token must be allowed to request reviewers.
+
+**Side effects:** Requests the listed users as reviewers and posts a review-request comment. The PR author cannot be assigned.
+""",
+    "unassign": """
+### `/unassign` Help
+
+**Syntax:** `/unassign user1 [user2 ...]`
+
+**Example:** `/unassign octocat monalisa`
+
+**Permissions:** The configured GitHub token must be allowed to manage requested reviewers.
+
+**Side effects:** Removes the listed users from the PR's requested reviewers and posts a confirmation comment.
+""",
+    "label": """
+### `/label` Help
+
+**Syntax:** `/label label1 [label2 ...]`
+
+**Example:** `/label bug needs-review`
+
+**Permissions:** The configured GitHub token must be allowed to manage issue and PR labels.
+
+**Side effects:** Adds the listed labels to the PR and posts a confirmation comment.
+""",
+    "unlabel": """
+### `/unlabel` Help
+
+**Syntax:** `/unlabel label1 [label2 ...]`
+
+**Example:** `/unlabel needs-review`
+
+**Permissions:** The configured GitHub token must be allowed to manage issue and PR labels.
+
+**Side effects:** Removes the listed labels from the PR and posts a confirmation comment.
+""",
+    "lgtm": """
+### `/lgtm` Help
+
+**Syntax:** `/lgtm`
+
+**Example:** `/lgtm`
+
+**Permissions:** A vote counts only when the reviewer has one of these repository permissions: `{permissions}`. Self-approval is rejected. The configured threshold is **{threshold}**.
+
+**Side effects:** Records the comment as an approval signal, submits a `{review_event}` review when configured, and posts the current vote breakdown.
+""",
+    "merge": """
+### `/merge` Help
+
+**Syntax:** `/merge [merge|squash|rebase]`
+
+**Examples:** `/merge` or `/merge squash`
+
+**Permissions:** The caller must have one of these repository permissions: `{permissions}`. The PR needs **{threshold}** valid approval(s), unless the configured direct-merge rules apply.
+
+**Side effects:** Verifies required checks and approvals, then merges with the requested method or the configured `{merge_method}` default. Any queued `/cherry-pick` requests are processed after the merge.
+""",
+    "cherry-pick": """
+### `/cherry-pick` Help
+
+**Syntax:** `/cherry-pick target-branch`
+
+**Example:** `/cherry-pick release-v1.2`
+
+**Permissions:** The configured GitHub token must be allowed to read commits and update the target branch.
+
+**Side effects:** Queues the PR commits to be cherry-picked to the target branch after the PR is merged. Conflicts require manual resolution.
+""",
+    "rebase": """
+### `/rebase` Help
+
+**Syntax:** `/rebase`
+
+**Example:** `/rebase`
+
+**Permissions:** The configured GitHub token and repository settings must allow the PR branch to be updated.
+
+**Side effects:** Requests GitHub to update the PR branch from its base branch and posts a confirmation comment.
+""",
+    "help": """
+### `/help` Help
+
+**Syntax:** `/help [command]`
+
+**Examples:** `/help` or `/help merge`
+
+**Permissions:** Any user who can trigger the Boussole pipeline may request help.
+
+**Side effects:** Posts either the general command table or detailed help for one command. It does not modify the PR.
+""",
+}
+
+UNKNOWN_HELP_TOPIC = """
+### Unknown Help Topic
+
+No detailed help is available for `{topic}`.
+
+{general_help}
+"""
+
 APPROVED_TEMPLATE = """
 Congrats @{pr_sender} your PR Has been approved 🎉
 

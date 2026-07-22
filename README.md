@@ -35,6 +35,7 @@ automated actions.
 | `/merge [method]`            | Merges the PR if it has enough `/lgtm` approvals. Optional method: `merge`, `squash`, or `rebase` |
 | `/rebase`                    | Rebases the PR branch on the base branch                        |
 | `/help`                      | Displays available commands                                     |
+| `/help <command>`            | Displays syntax, examples, permissions, and effects for a command |
 
 > **Note:**
 >
@@ -42,6 +43,13 @@ automated actions.
 >   comment yet).
 > - The command must be at the start of the comment; any preceding text will be
 >   ignored.
+
+For focused usage details, request help for a specific command:
+
+```text
+/help merge
+/help cherry-pick
+```
 
 ## Usage
 

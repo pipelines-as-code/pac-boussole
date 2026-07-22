@@ -5,6 +5,34 @@ import pytest
 from boussole.boussole import PRHandler, main  # Import main and PRHandler
 
 
+def main_args(trigger_comment):
+    return [
+        "prog",
+        "--github-token",
+        "token",
+        "--pr-num",
+        "1",
+        "--pr-sender",
+        "user",
+        "--comment-sender",
+        "admin",
+        "--repo-owner",
+        "owner",
+        "--repo-name",
+        "repo",
+        "--trigger-comment",
+        trigger_comment,
+        "--lgtm-threshold",
+        "1",
+        "--lgtm-permissions",
+        "admin,write",
+        "--lgtm-review-event",
+        "APPROVE",
+        "--merge-method",
+        "squash",
+    ]
+
+
 # Dummy response to simulate successful API call.
 class DummyResponse:
     """
@@ -40,31 +68,7 @@ def test_main_help_success(monkeypatch, capsys):
     monkeypatch.setattr(PRHandler, "check_response", lambda self, resp: True)
 
     # Set sys.argv with valid parameters and a trigger comment for "help".
-    sys.argv = [
-        "prog",
-        "--github-token",
-        "token",
-        "--pr-num",
-        "1",
-        "--pr-sender",
-        "user",
-        "--comment-sender",
-        "admin",
-        "--repo-owner",
-        "owner",
-        "--repo-name",
-        "repo",
-        "--trigger-comment",
-        "/help",
-        "--lgtm-threshold",
-        "1",
-        "--lgtm-permissions",
-        "admin,write",
-        "--lgtm-review-event",
-        "APPROVE",
-        "--merge-method",
-        "squash",
-    ]
+    sys.argv = main_args("/help")
 
     # Call main; expecting it to complete without sys.exit
     try:
@@ -80,31 +84,7 @@ def test_main_help_success(monkeypatch, capsys):
 # Test for the main function with an invalid command.
 def test_main_invalid_command(monkeypatch):
     # Set sys.argv with a trigger comment that does not match a valid command.
-    sys.argv = [
-        "prog",
-        "--github-token",
-        "token",
-        "--pr-num",
-        "1",
-        "--pr-sender",
-        "user",
-        "--comment-sender",
-        "admin",
-        "--repo-owner",
-        "owner",
-        "--repo-name",
-        "repo",
-        "--trigger-comment",
-        "/invalidcmd",
-        "--lgtm-threshold",
-        "1",
-        "--lgtm-permissions",
-        "admin,write",
-        "--lgtm-review-event",
-        "APPROVE",
-        "--merge-method",
-        "squash",
-    ]
+    sys.argv = main_args("/invalidcmd")
     # Monkey-patch sys.exit to capture the exit code.
     exit_code = None
 
@@ -118,3 +98,44 @@ def test_main_invalid_command(monkeypatch):
     with pytest.raises(SystemExit):
         main()
     assert exit_code == 1
+
+
+@pytest.mark.parametrize(
+    ("trigger_comment", "expected"),
+    [
+        ("/help merge", "Syntax:"),
+        ("/help /lgtm", "Self-approval is rejected"),
+    ],
+)
+def test_main_command_specific_help(monkeypatch, trigger_comment, expected):
+    dummy = DummyResponse(200, "OK")
+
+    def fake_post_comment(_, message):
+        assert expected in message
+        assert "Permissions:" in message
+        assert "Side effects:" in message
+        return dummy
+
+    monkeypatch.setattr(PRHandler, "_post_comment", fake_post_comment)
+    monkeypatch.setattr(PRHandler, "check_status", lambda self, *_: True)
+    monkeypatch.setattr(PRHandler, "check_response", lambda self, resp: True)
+    sys.argv = main_args(trigger_comment)
+
+    main()
+
+
+@pytest.mark.parametrize("trigger_comment", ["/help frobnicate", "/help merge now"])
+def test_main_unknown_help_topic(monkeypatch, trigger_comment):
+    dummy = DummyResponse(200, "OK")
+
+    def fake_post_comment(_, message):
+        assert "Unknown Help Topic" in message
+        assert "Available Commands" in message
+        return dummy
+
+    monkeypatch.setattr(PRHandler, "_post_comment", fake_post_comment)
+    monkeypatch.setattr(PRHandler, "check_status", lambda self, *_: True)
+    monkeypatch.setattr(PRHandler, "check_response", lambda self, resp: True)
+    sys.argv = main_args(trigger_comment)
+
+    main()

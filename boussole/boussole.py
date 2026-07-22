@@ -22,6 +22,7 @@ from .messages import (  # isort:skip
     CHECKS_NOT_PASSED,
     COMMENTS_FETCH_ERROR,
     HELP_TEXT,
+    HELP_TOPIC_TEMPLATES,
     INSUFFICIENT_PERMISSIONS,
     LGTM_BREAKDOWN_TEMPLATE,
     MERGE_FAILED,
@@ -34,6 +35,7 @@ from .messages import (  # isort:skip
     CHERRY_PICK_SUCCESS,
     CHERRY_PICK_CONFLICT,
     REVIEW_REQUESTED,
+    UNKNOWN_HELP_TOPIC,
 )
 
 
@@ -76,6 +78,30 @@ class PRHandler:  # pylint: disable=too-many-instance-attributes
         """
         endpoint = f"issues/{self.pr_num}/comments"
         return self.api.post(endpoint, {"body": message})
+
+    def help(self, values: List[str]) -> RequestResponse:
+        """Posts general help or detailed help for one command."""
+        if not values:
+            return self._post_comment(HELP_TEXT.strip())
+
+        topic = values[0].lstrip("/").lower() if len(values) == 1 else " ".join(values)
+        template = HELP_TOPIC_TEMPLATES.get(topic) if len(values) == 1 else None
+        if template is None:
+            return self._post_comment(
+                UNKNOWN_HELP_TOPIC.format(
+                    topic=" ".join(values),
+                    general_help=HELP_TEXT.strip(),
+                ).strip()
+            )
+
+        return self._post_comment(
+            template.format(
+                threshold=self.lgtm_threshold,
+                permissions=", ".join(self.lgtm_permissions),
+                review_event=self.lgtm_review_event,
+                merge_method=self.merge_method,
+            ).strip()
+        )
 
     def _fetch_and_validate_lgtm_votes(self) -> Tuple[int, Dict[str, Optional[str]]]:
         """
@@ -810,7 +836,7 @@ def main():
     elif command == "rebase":
         response = pr_handler.rebase()
     elif command == "help":
-        response = pr_handler._post_comment(HELP_TEXT.strip())
+        response = pr_handler.help(values)
     elif command == "lgtm":
         pr_handler.lgtm()
     elif command == "merge":
